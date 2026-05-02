@@ -1,9 +1,3 @@
-Viewed scene.ts:1-237
-
-Here is the fully updated `src/scene.ts` code, featuring the realistic earth textures, atmospheric glow, and the moving 3D vehicle animation along the calculated flight paths:
-
-### `src/scene.ts`
-```typescript
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import gsap from 'gsap';
@@ -55,6 +49,9 @@ export class SceneManager {
     
     // Handle resize
     window.addEventListener('resize', this.onWindowResize.bind(this));
+    
+    // Handle clicks
+    window.addEventListener('click', this.onMouseClick.bind(this));
     
     // Animation Loop
     this.tick();
@@ -226,6 +223,57 @@ export class SceneManager {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
   
+  // Interactive Raycasting properties
+  private raycaster = new THREE.Raycaster();
+  private mouse = new THREE.Vector2();
+  
+  private onMouseClick(event: MouseEvent) {
+    // Don't interact if clicking on UI panels
+    if ((event.target as HTMLElement).tagName !== 'CANVAS') return;
+    
+    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Intersect with earth only
+    if (this.earth) {
+      const intersects = this.raycaster.intersectObject(this.earth);
+      if (intersects.length > 0) {
+        this.addPinAt(intersects[0].point);
+      }
+    }
+  }
+  
+  private addPinAt(position: THREE.Vector3) {
+    // Core glowing pin
+    const geo = new THREE.SphereGeometry(0.04, 16, 16);
+    const mat = new THREE.MeshBasicMaterial({ color: 0x92FE9D });
+    const pin = new THREE.Mesh(geo, mat);
+    pin.position.copy(position);
+    this.scene.add(pin);
+    
+    // Outer ring pulse
+    const ringGeo = new THREE.RingGeometry(0.06, 0.08, 32);
+    const ringMat = new THREE.MeshBasicMaterial({ 
+      color: 0x00C9FF, 
+      side: THREE.DoubleSide, 
+      transparent: true,
+      opacity: 0.8
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.copy(position);
+    ring.lookAt(new THREE.Vector3(0, 0, 0)); // Face center of earth
+    this.scene.add(ring);
+    
+    // Animations
+    pin.scale.set(0, 0, 0);
+    gsap.to(pin.scale, { x: 1, y: 1, z: 1, duration: 0.6, ease: 'back.out(1.5)' });
+    
+    gsap.to(ring.scale, { x: 3, y: 3, z: 3, duration: 1.5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    gsap.to(ringMat, { opacity: 0, duration: 1.5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+  }
+
   private tick() {
     requestAnimationFrame(this.tick.bind(this));
     
@@ -240,4 +288,3 @@ export class SceneManager {
     this.renderer.render(this.scene, this.camera);
   }
 }
-```
