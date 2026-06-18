@@ -1,7 +1,3 @@
-Here is the complete `src/style.css` file with all the custom glassmorphism styles, UI layouts, and animations!
-
-### `src/style.css`
-```css
 :root {
   --bg-color: #050505;
   --text-primary: #ffffff;
@@ -177,6 +173,19 @@ body {
 .search-box input:focus {
   border-color: var(--accent-color);
   box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.search-box label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
 }
 
 .filters {
@@ -410,75 +419,82 @@ body {
   animation: slideInUp 1s ease forwards;
 }
 
-.budget-header {
+.brochure-panel {
+  position: absolute;
+  bottom: 100px;
+  right: 32px;
+  width: 360px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: slideInUp 1s ease forwards;
+}
+
+.brochure-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 16px;
+  gap: 16px;
+  align-items: flex-start;
 }
 
-.budget-header h3 {
-  font-size: 16px;
-  font-weight: 600;
+.brochure-header h3 {
+  margin: 0;
+  font-size: 18px;
 }
 
-.budget-header .total {
-  font-family: 'Outfit', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--accent-color);
-  text-shadow: 0 0 10px var(--accent-glow);
-}
-
-.chart-container {
-  height: 150px;
-  width: 100%;
-}
-
-/* --- Bottom Bar --- */
-.bottom-bar {
-  position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  display: flex;
-  gap: 32px;
-  border-radius: 100px;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
+.brochure-header .subtitle {
+  margin-top: 6px;
+  font-size: 12px;
   color: var(--text-secondary);
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: color 0.3s ease;
 }
 
-.icon-btn:hover,
-.icon-btn.active {
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
   color: var(--text-primary);
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
 }
 
-/* Animations */
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-50px); }
-  to { opacity: 1; transform: translateX(0); }
+.secondary-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
 }
 
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(50px); }
-  to { opacity: 1; transform: translateX(0); }
+.brochure-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-@keyframes slideInUp {
-  from { opacity: 0; transform: translateY(50px); }
-  to { opacity: 1; transform: translateY(0); }
+.brochure-content .placeholder {
+  color: var(--text-secondary);
+  font-size: 13px;
 }
-```
+
+.brochure-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.brochure-card h4 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.brochure-card p,
+.brochure-card li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.brochure-card ul {
+  padding-left: 18px;
+  margin: 8px 0 0 0;
+}
