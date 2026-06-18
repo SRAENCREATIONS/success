@@ -1,5 +1,7 @@
 import './style.css';
 import { SceneManager } from './scene';
+import { DataService } from './dataService';
+import type { TripData } from './dataService';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize 3D Scene
@@ -7,8 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize Budget Chart
   const ctx = document.getElementById('budgetChart') as HTMLCanvasElement;
+  let budgetChart: any = null;
   if (ctx && (window as any).Chart) {
-    new (window as any).Chart(ctx, {
+    budgetChart = new (window as any).Chart(ctx, {
       type: 'doughnut',
       data: {
         labels: ['Flights', 'Hotels', 'Activities', 'Food'],
@@ -39,28 +42,134 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // UI Interactions
   const animateBtn = document.getElementById('btn-animate-route');
-  
-  if (animateBtn) {
-    animateBtn.addEventListener('click', () => {
-      // Dummy Coordinates for Goa trip (Mumbai -> Goa approximation)
-      // Mumbai: 19.0760° N, 72.8777° E
-      // Goa: 15.2993° N, 74.1240° E
-      const startLat = 19.0760;
-      const startLng = 72.8777;
-      const endLat = 15.2993;
-      const endLng = 74.1240;
-      
-      sceneManager.animateRoute(startLat, startLng, endLat, endLng);
-      
-      // Visual feedback on button
-      animateBtn.innerText = "Crafting Route... 🚀";
-      setTimeout(() => {
-        animateBtn.innerText = "Journey Generated ✨";
-        animateBtn.style.background = "linear-gradient(135deg, #00C9FF, #92FE9D)";
-      }, 1000);
+  const tripInput = document.getElementById('trip-input') as HTMLInputElement;
+  const destinationInput = document.getElementById('destination-input') as HTMLInputElement;
+  const budgetInput = document.getElementById('budget-input') as HTMLInputElement;
+  const brochureContent = document.getElementById('brochure-content');
+  const downloadBtn = document.getElementById('btn-download-brochure');
+
+  const renderBrochure = (tripData: TripData) => {
+    if (!brochureContent) return;
+
+    brochureContent.innerHTML = `
+      <div class="brochure-card">
+        <h4>${tripData.destination} • ${tripData.days}-Day Trip</h4>
+        <p class="budget-summary">Budget: ${tripData.budget.total}</p>
+        <p>${tripData.weather.desc} | ${tripData.weather.temp}, ${tripData.weather.condition}</p>
+
+        <div class="brochure-row">
+          <div class="brochure-item">
+            <h5>Top Activities</h5>
+            <ul>
+              ${tripData.itinerary.slice(0, 4).map((item: { title: string }) => `<li>${item.title}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="brochure-item">
+            <h5>Transport</h5>
+            <p>${tripData.transport.icon} ${tripData.transport.title}</p>
+            <p>${tripData.transport.desc}</p>
+          </div>
+        </div>
+
+        <div class="brochure-row">
+          <div class="brochure-item">
+            <h5>Route</h5>
+            <p>Navigate the globe to ${tripData.destination} coordinates.</p>
+          </div>
+          <div class="brochure-item">
+            <h5>Budget Split</h5>
+            <p>Flights: ₹ ${tripData.budget.breakdown[0].toLocaleString()}</p>
+            <p>Hotels: ₹ ${tripData.budget.breakdown[1].toLocaleString()}</p>
+            <p>Activities: ₹ ${tripData.budget.breakdown[2].toLocaleString()}</p>
+            <p>Food: ₹ ${tripData.budget.breakdown[3].toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+      window.print();
     });
   }
-  
+
+  if (animateBtn && tripInput && destinationInput && budgetInput) {
+    // Handle Enter key
+    tripInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        animateBtn.click();
+      }
+    });
+
+    animateBtn.addEventListener('click', () => {
+      const destination = destinationInput.value.trim();
+      const query = tripInput.value.trim();
+      const budgetValue = parseInt(budgetInput.value.replace(/[^0-9]/g, ''), 10);
+      const prompt = destination || query || 'Goa';
+      const budget = Number.isFinite(budgetValue) && budgetValue > 0 ? budgetValue : undefined;
+
+      // Visual feedback on button
+      animateBtn.innerText = "Crafting Route... 🚀";
+      animateBtn.style.opacity = '0.7';
+      
+      setTimeout(() => {
+        const tripData = DataService.generateTripData(prompt, budget);
+
+        // Update Weather
+        document.getElementById('weather-temp')!.innerText = tripData.weather.temp;
+        document.getElementById('weather-cond')!.innerText = tripData.weather.condition;
+        document.getElementById('weather-desc')!.innerText = tripData.weather.desc;
+
+        // Update Transport
+        document.getElementById('transport-icon')!.innerText = tripData.transport.icon;
+        document.getElementById('transport-title')!.innerText = tripData.transport.title;
+        document.getElementById('transport-desc')!.innerText = tripData.transport.desc;
+        const statusEl = document.getElementById('transport-status')!;
+        statusEl.innerText = tripData.transport.status;
+        statusEl.className = `status ${tripData.transport.statusClass}`;
+
+        // Update Budget Total and Chart
+        document.getElementById('budget-total')!.innerText = tripData.budget.total;
+        if (budgetChart) {
+          budgetChart.data.datasets[0].data = tripData.budget.breakdown;
+          budgetChart.update();
+        }
+
+        // Update Itinerary
+        const itineraryContainer = document.getElementById('itinerary-container');
+        if (itineraryContainer) {
+          itineraryContainer.innerHTML = tripData.itinerary.map(item => `
+            <div class="timeline-item">
+              <div class="dot"></div>
+              <div class="time">Day ${item.day} • ${item.time}</div>
+              <h4>${item.title}</h4>
+              <p>${item.desc}</p>
+            </div>
+          `).join('');
+        }
+
+        // Animate globe from Mumbai to destination
+        const startLat = 19.0760; // Mumbai
+        const startLng = 72.8777;
+        sceneManager.animateRoute(startLat, startLng, tripData.coordinates.lat, tripData.coordinates.lng);
+
+        renderBrochure(tripData);
+
+        // Reset Button
+        animateBtn.innerText = "Journey Generated ✨";
+        animateBtn.style.opacity = '1';
+        animateBtn.style.background = "linear-gradient(135deg, #00C9FF, #92FE9D)";
+        
+        setTimeout(() => {
+          animateBtn.innerText = "Craft Journey ✨";
+          animateBtn.style.background = "var(--primary-gradient)";
+        }, 3000);
+
+      }, 1000); // Simulate network/AI generation delay
+    });
+  }
+
   // Sidebar Trip Interactions
   const tripCards = document.querySelectorAll('.trip-card');
   tripCards.forEach(card => {
