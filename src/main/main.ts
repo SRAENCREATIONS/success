@@ -1,7 +1,7 @@
 import './style.css';
-import { SceneManager } from './scene';
-import { DataService } from './dataService';
-import type { TripData } from './dataService';
+import { SceneManager } from './scene.ts';
+import { DataService } from './dataService.ts';
+import type { TripData } from './dataService.ts';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize 3D Scene
@@ -181,16 +181,14 @@ document.addEventListener('DOMContentLoaded', () => {
     card.addEventListener('click', () => {
       const title = card.querySelector('h4')?.innerText;
       if (title === 'Kyoto Serenity') {
-        // Tokyo to Kyoto
         sceneManager.animateRoute(35.6762, 139.6503, 35.0116, 135.7681);
       } else if (title === 'Patagonia Trails') {
-        // Buenos Aires to Patagonia
         sceneManager.animateRoute(-34.6037, -58.3816, -50.3379, -72.2653);
       }
     });
   });
 
-  // Generic Button Interactivity (Header & Bottom Bar)
+  // Generic Button Interactivity
   const navButtons = document.querySelectorAll('.header nav button, .bottom-bar .icon-btn');
   navButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
