@@ -95,12 +95,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (animateBtn && tripInput && destinationInput && budgetInput) {
-    // Handle Enter key
-    tripInput.addEventListener('keypress', (e) => {
+    // Handle Enter key across all form fields
+    const submitOnEnter = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
+        e.preventDefault();
         animateBtn.click();
       }
-    });
+    };
+
+    tripInput.addEventListener('keypress', submitOnEnter);
+    destinationInput.addEventListener('keypress', submitOnEnter);
+    budgetInput.addEventListener('keypress', submitOnEnter);
 
     animateBtn.addEventListener('click', () => {
       const destination = destinationInput.value.trim();
@@ -139,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Itinerary
         const itineraryContainer = document.getElementById('itinerary-container');
         if (itineraryContainer) {
-          itineraryContainer.innerHTML = tripData.itinerary.map(item => `
+          itineraryContainer.innerHTML = tripData.itinerary.map((item: TripData['itinerary'][number]) => `
             <div class="timeline-item">
               <div class="dot"></div>
               <div class="time">Day ${item.day} • ${item.time}</div>
