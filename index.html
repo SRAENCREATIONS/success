@@ -1,7 +1,3 @@
-Here is the complete `index.html` file. This contains the structure for the 3D canvas, the UI overlay panels, the navigation buttons, and the interactive budget chart.
-
-### `index.html`
-```html
 <!doctype html>
 <html lang="en">
 
@@ -49,8 +45,19 @@ Here is the complete `index.html` file. This contains the structure for the 3D c
       <h2>Where to next?</h2>
       <p class="subtitle">Our AI synthesizes the world's knowledge to craft your perfect itinerary.</p>
 
+      <div class="input-grid">
+        <div class="search-box">
+          <label for="destination-input">Destination</label>
+          <input type="text" id="destination-input" placeholder="Goa, Paris, Tokyo" />
+        </div>
+        <div class="search-box">
+          <label for="budget-input">Budget (₹)</label>
+          <input type="number" id="budget-input" placeholder="18000" min="0" />
+        </div>
+      </div>
+
       <div class="search-box">
-        <input type="text" placeholder="Plan a 4-day Goa trip with a mix of beach heritage and night markets..." />
+        <input type="text" id="trip-input" placeholder="Optional: Plan a 4-day Goa trip with beach and heritage experiences" />
       </div>
 
       <div class="filters">
@@ -81,37 +88,41 @@ Here is the complete `index.html` file. This contains the structure for the 3D c
     <div class="glass-panel floating-right">
       <div class="weather-widget">
         <div class="weather-info">
-          <span class="temp">18°C</span>
-          <span class="condition">Partly Cloudy</span>
+          <span class="temp" id="weather-temp">18°C</span>
+          <span class="condition" id="weather-cond">Partly Cloudy</span>
         </div>
-        <p>Perfect conditions for travel</p>
+        <p id="weather-desc">Perfect conditions for travel</p>
       </div>
 
       <div class="itinerary-timeline">
         <h3>Itinerary Timeline</h3>
-        <div class="timeline-item">
-          <div class="dot"></div>
-          <div class="time">Day 1 • 10:45 AM</div>
-          <h4>Arrival at Dabolim Airport</h4>
-          <p>Driver will be waiting at Gate 2.</p>
-        </div>
-        <div class="timeline-item">
-          <div class="dot"></div>
-          <div class="time">Day 1 • 12:30 PM</div>
-          <h4>Check-in at Taj Exotica</h4>
-          <p>Sea view room guaranteed.</p>
+        <div id="itinerary-container">
+          <div class="timeline-item">
+            <div class="dot"></div>
+            <div class="time">Day 1 • 10:45 AM</div>
+            <h4>Arrival at Dabolim Airport</h4>
+            <p>Driver will be waiting at Gate 2.</p>
+          </div>
+          <div class="timeline-item">
+            <div class="dot"></div>
+            <div class="time">Day 1 • 12:30 PM</div>
+            <h4>Check-in at Taj Exotica</h4>
+            <p>Sea view room guaranteed.</p>
+          </div>
         </div>
       </div>
 
       <div class="transport-suggestions">
         <h3>Live Transport Routes</h3>
-        <div class="transport-card">
-          <span class="icon">✈️</span>
-          <div class="details">
-            <h4>Flight AI-302</h4>
-            <p>Boarding in 45m</p>
+        <div id="transport-container">
+          <div class="transport-card">
+            <span class="icon" id="transport-icon">✈️</span>
+            <div class="details">
+              <h4 id="transport-title">Flight AI-302</h4>
+              <p id="transport-desc">Boarding in 45m</p>
+            </div>
+            <span class="status pulse-green" id="transport-status">On Time</span>
           </div>
-          <span class="status pulse-green">On Time</span>
         </div>
       </div>
     </div>
@@ -120,10 +131,23 @@ Here is the complete `index.html` file. This contains the structure for the 3D c
     <div class="glass-panel budget-panel">
       <div class="budget-header">
         <h3>Trip Budget</h3>
-        <span class="total">₹ 18,500</span>
+        <span class="total" id="budget-total">₹ 18,500</span>
       </div>
       <div class="chart-container">
         <canvas id="budgetChart"></canvas>
+      </div>
+    </div>
+
+    <div class="glass-panel brochure-panel" id="brochure-panel">
+      <div class="brochure-header">
+        <div>
+          <h3>Travel Brochure</h3>
+          <p class="subtitle">Instant itinerary and budget brochure for your destination.</p>
+        </div>
+        <button id="btn-download-brochure" class="secondary-btn">Download Brochure</button>
+      </div>
+      <div id="brochure-content" class="brochure-content">
+        <p class="placeholder">Enter a destination and budget, then click Craft Journey to generate your brochure.</p>
       </div>
     </div>
 
@@ -140,4 +164,3 @@ Here is the complete `index.html` file. This contains the structure for the 3D c
 </body>
 
 </html>
-```
